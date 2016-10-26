@@ -81,6 +81,11 @@ def login(args):
         url = args[0]
     else:
         url = click.prompt('URL of Kubernetes API server')
+
+    if not url.startswith('http'):
+        # user convenience
+        url = 'https://' + url
+
     path = get_config_path()
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as fd:
