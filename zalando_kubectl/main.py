@@ -9,8 +9,8 @@ import zign.api
 from clickclick import Action
 
 APP_NAME = 'zalando-kubectl'
-KUBECTL_URL_TEMPLATE = "https://storage.googleapis.com/kubernetes-release/release/{version}/bin/{os}/{arch}/kubectl"
-KUBECTL_VERSION  = "v1.4.4"
+KUBECTL_URL_TEMPLATE = 'https://storage.googleapis.com/kubernetes-release/release/{version}/bin/{os}/{arch}/kubectl'
+KUBECTL_VERSION = 'v1.4.4'
 
 
 def get_config_path():
@@ -23,7 +23,7 @@ def ensure_kubectl():
     if not os.path.exists(kubectl):
         os.makedirs(os.path.dirname(kubectl), exist_ok=True)
 
-        platform = sys.platform # linux or darwin
+        platform = sys.platform  # linux or darwin
         arch = 'amd64'  # FIXME: hardcoded value
         url = KUBECTL_URL_TEMPLATE.format(version=KUBECTL_VERSION, os=platform, arch=arch)
         with Action('Downloading {}..'.format(url)) as act:
@@ -31,15 +31,14 @@ def ensure_kubectl():
             local_file = kubectl + '.download'
             with open(local_file, 'wb') as fd:
                 for i, chunk in enumerate(response.iter_content(chunk_size=4096)):
-                    if chunk: # filter out keep-alive new chunks
+                    if chunk:  # filter out keep-alive new chunks
                         fd.write(chunk)
-                        if i % 256 == 0: # every 1MB
+                        if i % 256 == 0:  # every 1MB
                             act.progress()
             os.chmod(local_file, 0o755)
             os.rename(local_file, kubectl)
 
     return kubectl
-
 
 
 def proxy():
@@ -60,7 +59,8 @@ def proxy():
     path = os.path.expanduser('~/.kube/config')
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
-    config = {'apiVersion': 'v1',
+    config = {
+        'apiVersion': 'v1',
         'kind': 'Config',
         'clusters': [{'name': 'default', 'cluster': {'server': url}}],
         'users': [{'name': 'default', 'user': {'token': token}}],
@@ -92,5 +92,3 @@ def main():
         login(args)
     else:
         proxy()
-
-
