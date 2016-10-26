@@ -1,0 +1,15 @@
+dist
+build
+*.egg-info
+*.iml
+.idea
+.tox
+*.pyc
+.coverage
+coverage.xml
+junit.xml
+*.egg*
+.cache/
+htmlcov/
+*.swp
+test.yaml

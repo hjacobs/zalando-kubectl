@@ -1,0 +1,4 @@
+clickclick>=1.2.1
+PyYAML>=3.11
+requests
+stups-zign>=1.0.23
