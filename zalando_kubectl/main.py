@@ -41,17 +41,18 @@ def ensure_kubectl():
     return kubectl
 
 
-def proxy():
-
-    url = None
-    while not url:
+def get_url():
+    while True:
         try:
             with open(get_config_path()) as fd:
                 data = yaml.safe_load(fd)
-            url = data['url']
+            return data['url']
         except:
             login([])
 
+
+def proxy():
+    url = get_url()
     kubectl = ensure_kubectl()
 
     token = zign.api.get_token('kubectl', ['uid'])
@@ -59,6 +60,7 @@ def proxy():
     path = os.path.expanduser('~/.kube/config')
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
+    # TODO: we should not overwrite the whole kubeconfig
     config = {
         'apiVersion': 'v1',
         'kind': 'Config',
@@ -85,10 +87,12 @@ def login(args):
         yaml.safe_dump({'url': url}, fd)
 
 
-def main():
-    cmd = ''.join(sys.argv[1:2])
-    args = sys.argv[2:]
+def main(args=None):
+    if not args:
+        args = sys.argv
+    cmd = ''.join(args[1:2])
+    cmd_args = args[2:]
     if cmd == 'login':
-        login(args)
+        login(cmd_args)
     else:
         proxy()
