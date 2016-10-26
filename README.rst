@@ -14,7 +14,7 @@ Zalando Kubectl
    :target: https://pypi.python.org/pypi/zalando-kubectl/
    :alt: License
 
-Command line client for the Zalando Monitoring solution (ZMON).
+Kubernetes CLI (kubectl) wrapper in Python with OAuth token authentication.
 
 Requires Python 3.4.
 

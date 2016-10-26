@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Setup file for ZMON CLI
-"""
-
 import sys
 import os
 import inspect
