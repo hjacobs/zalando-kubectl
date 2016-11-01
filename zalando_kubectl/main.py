@@ -93,11 +93,14 @@ def login(args):
 
 
 def main(args=None):
-    if not args:
-        args = sys.argv
-    cmd = ''.join(args[1:2])
-    cmd_args = args[2:]
-    if cmd == 'login':
-        login(cmd_args)
-    else:
-        proxy()
+    try:
+        if not args:
+            args = sys.argv
+        cmd = ''.join(args[1:2])
+        cmd_args = args[2:]
+        if cmd == 'login':
+            login(cmd_args)
+        else:
+            proxy()
+    except KeyboardInterrupt:
+        pass
