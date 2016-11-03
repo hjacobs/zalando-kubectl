@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 from zalando_kubectl.main import main
 
+
 def test_main(monkeypatch):
     call = MagicMock()
     monkeypatch.setattr('zalando_kubectl.main.ensure_kubectl', MagicMock())
