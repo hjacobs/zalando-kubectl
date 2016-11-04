@@ -5,7 +5,7 @@ import subprocess
 import sys
 import yaml
 import zign.api
-from .kube_config import kube_config
+from . import kube_config
 from clickclick import Action
 
 APP_NAME = 'zalando-kubectl'

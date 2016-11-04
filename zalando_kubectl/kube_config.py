@@ -11,7 +11,7 @@ def update(url, token):
         'kind': 'Config',
         'clusters': [{'name': name, 'cluster': {'server': url}}],
         'users': [{'name': name, 'user': {'token': token}}],
-        'contexts': [{'name': name, 'context': {'cluster': name, 'user': name}}],
+        'contexts': [{'name': name, 'context': {'cluster': 'default', 'user': 'default'}}],
         'current-context': name
     }
     config = insert(new_config)
