@@ -5,7 +5,7 @@ import subprocess
 import sys
 import yaml
 import zign.api
-
+from . import kube_config
 from clickclick import Action
 
 APP_NAME = 'zalando-kubectl'
@@ -56,23 +56,7 @@ def proxy():
     kubectl = ensure_kubectl()
 
     token = zign.api.get_token('kubectl', ['uid'])
-
-    path = os.path.expanduser('~/.kube/config')
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-
-    # TODO: we should not overwrite the whole kubeconfig
-    config = {
-        'apiVersion': 'v1',
-        'kind': 'Config',
-        'clusters': [{'name': 'default', 'cluster': {'server': url}}],
-        'users': [{'name': 'default', 'user': {'token': token}}],
-        'contexts': [{'name': 'default', 'context': {'cluster': 'default', 'user': 'default'}}],
-        'current-context': 'default'
-    }
-
-    with open(path, 'w') as fd:
-        yaml.safe_dump(config, fd)
-
+    kube_config.update(url, token)
     subprocess.call([kubectl] + sys.argv[1:])
 
 
