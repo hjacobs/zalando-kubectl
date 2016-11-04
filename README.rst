@@ -40,4 +40,14 @@ Usage
     $ zalando-kubectl login https://my-api-server.example.org
     $ zalando-kubectl cluster-info
 
+Unit Tests
+==========
+
+Run unit tests with Tox:
+
+.. code-block:: bash
+
+    $ sudo pip3 install tox
+    $ tox
+
 .. _zign: https://pypi.python.org/pypi/stups-zign

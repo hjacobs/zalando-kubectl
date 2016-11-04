@@ -10,5 +10,6 @@ def test_main(monkeypatch):
     monkeypatch.setattr('zalando_kubectl.main.login', MagicMock())
     monkeypatch.setattr('subprocess.call', call)
     monkeypatch.setattr('zalando_kubectl.main.get_url', MagicMock(return_value='foo,example.org'))
+    monkeypatch.setattr('zign.api.get_token', MagicMock(return_value='mytok'))
 
     main(['foo', 'get', 'pods'])
