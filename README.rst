@@ -2,6 +2,14 @@
 Zalando Kubectl
 ===============
 
+.. image:: https://travis-ci.org/zalando-incubator/zalando-kubectl.svg?branch=master
+   :target: https://travis-ci.org/zalando-incubator/zalando-kubectl
+   :alt: Build Status
+
+.. image:: https://coveralls.io/repos/zalando-incubator/zalando-kubectl/badge.svg
+   :target: https://coveralls.io/r/zalando-incubator/zalando-kubectl
+   :alt: Code Coverage
+
 .. image:: https://img.shields.io/pypi/dw/zalando-kubectl.svg
    :target: https://pypi.python.org/pypi/zalando-kubectl/
    :alt: PyPI Downloads
