@@ -11,7 +11,7 @@ def update(url, token):
         'kind': 'Config',
         'clusters': [{'name': name, 'cluster': {'server': url}}],
         'users': [{'name': name, 'user': {'token': token}}],
-        'contexts': [{'name': name, 'context': {'cluster': 'default', 'user': 'default'}}],
+        'contexts': [{'name': name, 'context': {'cluster': name, 'user': name}}],
         'current-context': name
     }
     config = insert(new_config)
@@ -61,6 +61,6 @@ def insert_key(config, item, key):
         return
     for it in config[key]:
         if it['name'] == item['name']:
-            it = item
+            it.update(**item)
             return
     config[key].append(item)
