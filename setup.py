@@ -48,7 +48,10 @@ CLASSIFIERS = [
     'License :: OSI Approved :: Apache Software License'
 ]
 
-CONSOLE_SCRIPTS = ['zalando-kubectl = zalando_kubectl.main:main']
+CONSOLE_SCRIPTS = [
+    'zalando-kubectl = zalando_kubectl.main:main',
+    'zkubectl = zalando_kubectl.main:main'
+]
 
 
 class PyTest(TestCommand):
