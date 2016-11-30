@@ -1,24 +1,22 @@
-import click
 import os
-import requests
 import subprocess
 import sys
-import yaml
+
+import click
+import requests
+import stups_cli.config
 import zign.api
-from . import kube_config
 from clickclick import Action
+
+from . import kube_config
 
 APP_NAME = 'zalando-kubectl'
 KUBECTL_URL_TEMPLATE = 'https://storage.googleapis.com/kubernetes-release/release/{version}/bin/{os}/{arch}/kubectl'
-KUBECTL_VERSION = 'v1.4.4'
-
-
-def get_config_path():
-    return os.path.join(click.get_app_dir(APP_NAME), 'config.yaml')
+KUBECTL_VERSION = 'v1.4.6'
 
 
 def ensure_kubectl():
-    kubectl = os.path.join(click.get_app_dir(APP_NAME), 'kubectl')
+    kubectl = os.path.join(click.get_app_dir(APP_NAME), 'kubectl-{}'.format(KUBECTL_VERSION))
 
     if not os.path.exists(kubectl):
         os.makedirs(os.path.dirname(kubectl), exist_ok=True)
@@ -44,9 +42,8 @@ def ensure_kubectl():
 def get_url():
     while True:
         try:
-            with open(get_config_path()) as fd:
-                data = yaml.safe_load(fd)
-            return data['url']
+            config = stups_cli.config.load_config(APP_NAME)
+            return config['api_server']
         except:
             login([])
 
@@ -70,10 +67,19 @@ def login(args):
         # user convenience
         url = 'https://' + url
 
-    path = get_config_path()
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'w') as fd:
-        yaml.safe_dump({'url': url}, fd)
+    config = stups_cli.config.load_config(APP_NAME)
+    config['api_server'] = url
+    stups_cli.config.store_config(config, APP_NAME)
+
+
+def configure(args):
+    # naive option parsing
+    config = {}
+    for arg in args:
+        if arg.startswith('--'):
+            key, val = arg.split('=', 1)
+            config[key[2:].replace('-', '_')] = val
+    stups_cli.config.store_config(config, APP_NAME)
 
 
 def main(args=None):
@@ -84,6 +90,8 @@ def main(args=None):
         cmd_args = args[2:]
         if cmd == 'login':
             login(cmd_args)
+        elif cmd == 'configure':
+            configure(cmd_args)
         else:
             proxy()
     except KeyboardInterrupt:
