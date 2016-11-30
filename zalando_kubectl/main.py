@@ -6,7 +6,7 @@ import click
 import requests
 import stups_cli.config
 import zign.api
-from clickclick import Action
+from clickclick import Action, error
 
 from . import kube_config
 
@@ -48,6 +48,13 @@ def get_url():
             login([])
 
 
+def fix_url(url):
+    if not url.startswith('http'):
+        # user convenience
+        url = 'https://' + url
+    return url
+
+
 def proxy():
     url = get_url()
     kubectl = ensure_kubectl()
@@ -58,16 +65,33 @@ def proxy():
 
 
 def login(args):
-    if args:
-        url = args[0]
-    else:
-        url = click.prompt('URL of Kubernetes API server')
-
-    if not url.startswith('http'):
-        # user convenience
-        url = 'https://' + url
-
     config = stups_cli.config.load_config(APP_NAME)
+
+    if args:
+        cluster_or_url = args[0]
+    else:
+        cluster_or_url = click.prompt('Cluster ID or URL of Kubernetes API server')
+
+    if len(cluster_or_url.split(':')) >= 3:
+        # looks like a Cluster ID (aws:123456789012:eu-central-1:kube-1)
+        cluster_id = cluster_or_url
+        cluster_registry = config.get('cluster_registry')
+        if not cluster_registry:
+            cluster_registry = fix_url(click.prompt('URL of Cluster Registry'))
+        token = zign.api.get_token('kubectl', ['uid'])
+        response = requests.get('{}/kubernetes-clusters/{}'.format(cluster_registry, cluster_id),
+                                headers={'Authorization': 'Bearer {}'.format(token)}, timeout=5)
+        if response.status_code == 404:
+            error('Kubernetes cluster {} not found in Cluster Registry'.format(cluster_id))
+            exit(1)
+        response.raise_for_status()
+        data = response.json()
+        url = data.get('api_server_url')
+    else:
+        url = cluster_or_url
+
+    url = fix_url(url)
+
     config['api_server'] = url
     stups_cli.config.store_config(config, APP_NAME)
 
