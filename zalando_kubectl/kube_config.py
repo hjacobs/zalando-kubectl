@@ -1,4 +1,5 @@
 import os
+
 import yaml
 
 KUBECONFIG = os.path.expanduser('~/.kube/config')
@@ -20,6 +21,7 @@ def update(url, token):
 
 
 def write_config(config):
+    os.makedirs(os.path.dirname(KUBECONFIG), exist_ok=True)
     with open(KUBECONFIG, 'w') as fd:
         yaml.safe_dump(config, fd)
 
@@ -33,15 +35,11 @@ def generate_name(url):
 
 
 def read_config():
-    os.makedirs(os.path.dirname(KUBECONFIG), exist_ok=True)
-    if not os.path.exists(KUBECONFIG):
-        with open(KUBECONFIG, 'w+') as fd:
-            pass
-        return {}
-    else:
+    try:
         with open(KUBECONFIG, 'r') as fd:
-            return yaml.load(fd.read())
-    return None
+            return yaml.safe_load(fd)
+    except:
+        return {}
 
 
 def insert(new_config):

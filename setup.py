@@ -49,7 +49,6 @@ CLASSIFIERS = [
 ]
 
 CONSOLE_SCRIPTS = [
-    'zalando-kubectl = zalando_kubectl.main:main',
     'zkubectl = zalando_kubectl.main:main'
 ]
 
