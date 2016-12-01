@@ -106,6 +106,7 @@ def configure(args):
     # naive option parsing
     config = {'cluster_registry': None}
     for arg in args:
+        # TODO: proper error handling
         if arg.startswith('--'):
             key, val = arg.split('=', 1)
             config_key = key[2:].replace('-', '_')

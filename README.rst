@@ -43,10 +43,29 @@ Requires Python 3.4+.
 Usage
 =====
 
+You can directly login to a known Kubernetes API server endpoint:
+
 .. code-block:: bash
 
     $ zkubectl login https://my-api-server.example.org
     $ zkubectl cluster-info
+
+You can also configure a Cluster Registry to look up clusters by ID:
+
+.. code-block:: bash
+
+    $ zkubectl configure --cluster-registry=https://cluster-registry.example.org
+    $ zkubectl login my-cluster-id
+
+The Cluster Registry needs to provide the following HTTP API for this to work:
+
+.. code-block:: bash
+
+    $ curl -H "Authorization: Bearer $(zign tok)" https://cluster-registry.example.org/kubernetes-clusters/my-cluster-id
+    {
+        "api_server_url": "https://my-api-server.example.org"
+    }
+
 
 Unit Tests
 ==========
