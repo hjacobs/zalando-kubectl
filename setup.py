@@ -25,7 +25,7 @@ def read_version(package):
 NAME = 'zalando-kubectl'
 MAIN_PACKAGE = 'zalando_kubectl'
 VERSION = read_version(MAIN_PACKAGE)
-DESCRIPTION = ""
+DESCRIPTION = "Kubectl wrapper in Python with OAuth token auth"
 LICENSE = 'Apache License 2.0'
 URL = 'https://github.com/zalando-incubator/zalando-kubectl'
 AUTHOR = 'Henning Jacobs'
