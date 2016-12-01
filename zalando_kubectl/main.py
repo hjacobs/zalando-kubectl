@@ -104,11 +104,15 @@ def login(args: list):
 
 def configure(args):
     # naive option parsing
-    config = {}
+    config = {'cluster_registry': None}
     for arg in args:
         if arg.startswith('--'):
             key, val = arg.split('=', 1)
-            config[key[2:].replace('-', '_')] = val
+            config_key = key[2:].replace('-', '_')
+            if config_key not in config:
+                error('Unsupported option "{}"'.format(key))
+                exit(2)
+            config[config_key] = val
     stups_cli.config.store_config(config, APP_NAME)
 
 

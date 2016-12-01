@@ -1,6 +1,6 @@
-
 from unittest.mock import MagicMock
 
+import pytest
 import zalando_kubectl.main
 from zalando_kubectl import kube_config
 from zalando_kubectl.main import main
@@ -71,3 +71,15 @@ def test_get_api_server_url(monkeypatch):
 
     url = zalando_kubectl.main.get_api_server_url('https://cluster-registry.example.org', 'my-cluster-id')
     assert url == 'https://my-cluster.example.org'
+
+
+def test_configure(monkeypatch):
+    config = {}
+
+    def store_config(conf, _):
+        config.update(**conf)
+    monkeypatch.setattr('stups_cli.config.store_config', store_config)
+    with pytest.raises(SystemExit):
+        zalando_kubectl.main.configure(['--my-option=123'])
+    zalando_kubectl.main.configure(['--cluster-registry=123'])
+    assert {'cluster_registry': '123'} == config
