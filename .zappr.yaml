@@ -6,8 +6,4 @@ approvals:
       from:
         orgs:
           - "zalando"
-
-  # Allow last committer / PR creator to approve as well.
-  # This will probably become the default in zappr.
-  ignore: none
 X-Zalando-Team: "teapot"
