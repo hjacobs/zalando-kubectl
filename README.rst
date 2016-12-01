@@ -24,7 +24,7 @@ Zalando Kubectl
 
 Kubernetes CLI (kubectl) wrapper in Python with OAuth token authentication.
 
-This wrapper script serves as a drop-in replacement for the ``kubectl`` binary:
+This wrapper script ``zkubectl`` serves as a drop-in replacement for the ``kubectl`` binary:
 
 * it downloads the current ``kubectl`` binary from Google
 * it generates a new ``~/.kube/config`` with an OAuth Bearer token acquired via `zign`_.
@@ -45,8 +45,8 @@ Usage
 
 .. code-block:: bash
 
-    $ zalando-kubectl login https://my-api-server.example.org
-    $ zalando-kubectl cluster-info
+    $ zkubectl login https://my-api-server.example.org
+    $ zkubectl cluster-info
 
 Unit Tests
 ==========
