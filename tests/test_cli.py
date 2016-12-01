@@ -1,7 +1,9 @@
 
 from unittest.mock import MagicMock
-from zalando_kubectl.main import main
+
+import zalando_kubectl.main
 from zalando_kubectl import kube_config
+from zalando_kubectl.main import main
 
 
 def test_main(monkeypatch):
@@ -38,3 +40,34 @@ def test_kube_config(monkeypatch):
                         MagicMock(return_value={'clusters': [{'name': 'zalan_k8s_do'}]}))
     cnfg = kube_config.update('zalan.k8s.do', 'token')
     assert len([cnfg['clusters']]) == 1
+
+
+def test_login(monkeypatch):
+    cluster_registry = 'https://cluster-registry.example.org'
+
+    store_config = MagicMock()
+    monkeypatch.setattr('stups_cli.config.load_config', lambda x: {'cluster_registry': cluster_registry})
+    monkeypatch.setattr('stups_cli.config.store_config', store_config)
+
+    api_url = 'https://my-cluster.example.org'
+
+    def get_api_server_url(cluster_registry_url, cluster_id):
+        assert cluster_registry_url == cluster_registry
+        assert cluster_id == 'aws:123:eu-west-1:my-kube-1'
+        return api_url
+
+    monkeypatch.setattr('zalando_kubectl.main.get_api_server_url', get_api_server_url)
+
+    url = zalando_kubectl.main.login(['aws:123:eu-west-1:my-kube-1'])
+    assert api_url == url
+
+
+def test_get_api_server_url(monkeypatch):
+    get = MagicMock()
+    get.return_value.json.return_value = {'api_server_url': 'https://my-cluster.example.org'}
+
+    monkeypatch.setattr('zign.api.get_token', lambda x, y: 'mytok')
+    monkeypatch.setattr('requests.get', get)
+
+    url = zalando_kubectl.main.get_api_server_url('https://cluster-registry.example.org', 'my-cluster-id')
+    assert url == 'https://my-cluster.example.org'

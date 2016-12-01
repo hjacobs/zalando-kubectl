@@ -64,7 +64,20 @@ def proxy():
     subprocess.call([kubectl] + sys.argv[1:])
 
 
-def login(args):
+def get_api_server_url(cluster_registry_url: str, cluster_id: str):
+    token = zign.api.get_token('kubectl', ['uid'])
+    response = requests.get('{}/kubernetes-clusters/{}'.format(cluster_registry_url, cluster_id),
+                            headers={'Authorization': 'Bearer {}'.format(token)}, timeout=5)
+    if response.status_code == 404:
+        error('Kubernetes cluster {} not found in Cluster Registry'.format(cluster_id))
+        exit(1)
+    response.raise_for_status()
+    data = response.json()
+    url = data.get('api_server_url')
+    return url
+
+
+def login(args: list):
     config = stups_cli.config.load_config(APP_NAME)
 
     if args:
@@ -78,15 +91,7 @@ def login(args):
         cluster_registry = config.get('cluster_registry')
         if not cluster_registry:
             cluster_registry = fix_url(click.prompt('URL of Cluster Registry'))
-        token = zign.api.get_token('kubectl', ['uid'])
-        response = requests.get('{}/kubernetes-clusters/{}'.format(cluster_registry, cluster_id),
-                                headers={'Authorization': 'Bearer {}'.format(token)}, timeout=5)
-        if response.status_code == 404:
-            error('Kubernetes cluster {} not found in Cluster Registry'.format(cluster_id))
-            exit(1)
-        response.raise_for_status()
-        data = response.json()
-        url = data.get('api_server_url')
+        url = get_api_server_url(cluster_registry, cluster_id)
     else:
         url = cluster_or_url
 
@@ -94,6 +99,7 @@ def login(args):
 
     config['api_server'] = url
     stups_cli.config.store_config(config, APP_NAME)
+    return url
 
 
 def configure(args):
