@@ -56,11 +56,8 @@ def fix_url(url):
 
 
 def proxy():
-    url = get_url()
     kubectl = ensure_kubectl()
 
-    token = zign.api.get_token('kubectl', ['uid'])
-    kube_config.update(url, token)
     subprocess.call([kubectl] + sys.argv[1:])
 
 
@@ -123,11 +120,13 @@ def main(args=None):
             args = sys.argv
         cmd = ''.join(args[1:2])
         cmd_args = args[2:]
+        token = zign.api.get_token('kubectl', ['uid'])
         if cmd == 'login':
-            login(cmd_args)
+            kube_config.update(login(cmd_args), token)
         elif cmd == 'configure':
             configure(cmd_args)
         else:
+            kube_config.update(get_url(), token)
             proxy()
     except KeyboardInterrupt:
         pass
