@@ -20,7 +20,7 @@ def test_main(monkeypatch):
 def test_kube_config(monkeypatch):
     monkeypatch.setattr('zalando_kubectl.kube_config.write_config', MagicMock())
     monkeypatch.setattr('zalando_kubectl.kube_config.read_config', MagicMock(return_value={}))
-
+    monkeypatch.setattr('zign.api.get_token', MagicMock(return_value='mytok'))
     cnfg = kube_config.update('zalan.k8s.do')
     assert cnfg['current-context'] == 'zalan_k8s_do'
     assert cnfg['apiVersion'] == 'v1'
