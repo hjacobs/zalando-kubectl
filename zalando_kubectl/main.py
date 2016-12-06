@@ -120,13 +120,12 @@ def main(args=None):
             args = sys.argv
         cmd = ''.join(args[1:2])
         cmd_args = args[2:]
-        token = zign.api.get_token('kubectl', ['uid'])
         if cmd == 'login':
-            kube_config.update(login(cmd_args), token)
+            kube_config.update(login(cmd_args))
         elif cmd == 'configure':
             configure(cmd_args)
         else:
-            kube_config.update(get_url(), token)
+            kube_config.update(get_url())
             proxy()
     except KeyboardInterrupt:
         pass

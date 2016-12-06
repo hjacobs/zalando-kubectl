@@ -1,11 +1,12 @@
 import os
-
+import zign.api
 import yaml
 
 KUBECONFIG = os.path.expanduser('~/.kube/config')
 
 
-def update(url, token):
+def update(url):
+    token = zign.api.get_token('kubectl', ['uid'])
     name = generate_name(url)
     new_config = {
         'apiVersion': 'v1',
