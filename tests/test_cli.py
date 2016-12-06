@@ -20,8 +20,8 @@ def test_main(monkeypatch):
 def test_kube_config(monkeypatch):
     monkeypatch.setattr('zalando_kubectl.kube_config.write_config', MagicMock())
     monkeypatch.setattr('zalando_kubectl.kube_config.read_config', MagicMock(return_value={}))
-
-    cnfg = kube_config.update('zalan.k8s.do', 'token')
+    monkeypatch.setattr('zign.api.get_token', MagicMock(return_value='mytok'))
+    cnfg = kube_config.update('zalan.k8s.do')
     assert cnfg['current-context'] == 'zalan_k8s_do'
     assert cnfg['apiVersion'] == 'v1'
     assert cnfg['kind'] == 'Config'
@@ -32,13 +32,13 @@ def test_kube_config(monkeypatch):
     monkeypatch.setattr(
                         'zalando_kubectl.kube_config.read_config',
                         MagicMock(return_value={'clusters': [{'name': 'foo'}]}))
-    cnfg = kube_config.update('zalan.k8s.do', 'token')
+    cnfg = kube_config.update('zalan.k8s.do')
     assert len([cnfg['clusters']]) > 0
 
     monkeypatch.setattr(
                         'zalando_kubectl.kube_config.read_config',
                         MagicMock(return_value={'clusters': [{'name': 'zalan_k8s_do'}]}))
-    cnfg = kube_config.update('zalan.k8s.do', 'token')
+    cnfg = kube_config.update('zalan.k8s.do')
     assert len([cnfg['clusters']]) == 1
 
 
