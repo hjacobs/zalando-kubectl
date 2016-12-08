@@ -38,9 +38,12 @@ def generate_name(url):
 def read_config():
     try:
         with open(KUBECONFIG, 'r') as fd:
-            return yaml.safe_load(fd)
+            data = yaml.safe_load(fd)
+        if isinstance(data, dict):
+            return data
     except:
-        return {}
+        pass
+    return {}
 
 
 def insert(new_config):
