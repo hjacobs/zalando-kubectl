@@ -49,6 +49,8 @@ def get_url():
 
 
 def fix_url(url):
+    # strip potential whitespace from prompt
+    url = url.strip()
     if not url.startswith('http'):
         # user convenience
         url = 'https://' + url

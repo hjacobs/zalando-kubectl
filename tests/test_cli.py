@@ -6,6 +6,10 @@ from zalando_kubectl import kube_config
 from zalando_kubectl.main import main
 
 
+def test_fix_url():
+    assert zalando_kubectl.main.fix_url(' api.example.org ') == 'https://api.example.org'
+
+
 def test_main(monkeypatch):
     call = MagicMock()
     monkeypatch.setattr('zalando_kubectl.main.ensure_kubectl', MagicMock())
