@@ -124,8 +124,16 @@ def configure(args):
 def _open_dashboard_in_browser():
     import webbrowser
     # sleep some time to make sure "kubectl proxy" runs
-    time.sleep(1)
     url = 'http://localhost:8001/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy'
+    with Action('Waiting for local kubectl proxy..') as act:
+        for i in range(20):
+            time.sleep(0.1)
+            try:
+                requests.get(url, timeout=2)
+            except:
+                act.progress()
+            else:
+                break
     info('\nOpening {} ..'.format(url))
     webbrowser.open(url)
 
@@ -135,8 +143,8 @@ def dashboard(args):
     # first make sure kubectl was downloaded
     ensure_kubectl()
     thread = threading.Thread(target=_open_dashboard_in_browser)
+    # start short-lived background thread to allow running "kubectl proxy" in main thread
     thread.start()
-    info('Starting local kubectl proxy..')
     kube_config.update(get_url())
     proxy(['proxy'])
 
