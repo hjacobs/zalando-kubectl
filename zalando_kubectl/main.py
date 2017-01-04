@@ -24,7 +24,7 @@ def ensure_kubectl():
         platform = sys.platform  # linux or darwin
         arch = 'amd64'  # FIXME: hardcoded value
         url = KUBECTL_URL_TEMPLATE.format(version=KUBECTL_VERSION, os=platform, arch=arch)
-        with Action('Downloading {}..'.format(url)) as act:
+        with Action('Downloading {} to {}..'.format(url, kubectl)) as act:
             response = requests.get(url, stream=True)
             response.raise_for_status()
             local_file = kubectl + '.download'
