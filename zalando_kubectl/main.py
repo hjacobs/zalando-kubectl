@@ -12,7 +12,7 @@ from . import kube_config
 
 APP_NAME = 'zalando-kubectl'
 KUBECTL_URL_TEMPLATE = 'https://storage.googleapis.com/kubernetes-release/release/{version}/bin/{os}/{arch}/kubectl'
-KUBECTL_VERSION = 'v1.4.7'
+KUBECTL_VERSION = 'v1.5.1'
 
 
 def ensure_kubectl():
@@ -24,8 +24,9 @@ def ensure_kubectl():
         platform = sys.platform  # linux or darwin
         arch = 'amd64'  # FIXME: hardcoded value
         url = KUBECTL_URL_TEMPLATE.format(version=KUBECTL_VERSION, os=platform, arch=arch)
-        with Action('Downloading {}..'.format(url)) as act:
+        with Action('Downloading {} to {}..'.format(url, kubectl)) as act:
             response = requests.get(url, stream=True)
+            response.raise_for_status()
             local_file = kubectl + '.download'
             with open(local_file, 'wb') as fd:
                 for i, chunk in enumerate(response.iter_content(chunk_size=4096)):
