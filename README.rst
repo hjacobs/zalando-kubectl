@@ -66,6 +66,16 @@ The Cluster Registry needs to provide the following HTTP API for this to work:
         "api_server_url": "https://my-api-server.example.org"
     }
 
+There is an additional convenience command to open the `Kubernetes Dashboard web UI`_ in the browser:
+
+.. code-block:: bash
+
+    $ zkubectl dashboard
+    Waiting for local kubectl proxy.. . . . . . . . . . .Starting to serve on 127.0.0.1:8001 OK
+
+    Opening http://localhost:8001/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy ..
+
+
 
 Unit Tests
 ==========
@@ -78,3 +88,4 @@ Run unit tests with Tox:
     $ tox
 
 .. _zign: https://pypi.python.org/pypi/stups-zign
+.. _Kubernetes Dashboard web UI: http://kubernetes.io/docs/user-guide/ui/
