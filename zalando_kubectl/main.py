@@ -5,8 +5,9 @@ import sys
 import click
 import requests
 import stups_cli.config
+import time
 import zign.api
-from clickclick import Action, error
+from clickclick import Action, error, info
 
 from . import kube_config
 
@@ -58,10 +59,13 @@ def fix_url(url):
     return url
 
 
-def proxy():
+def proxy(args=None):
     kubectl = ensure_kubectl()
 
-    subprocess.call([kubectl] + sys.argv[1:])
+    if not args:
+        args = sys.argv[1:]
+
+    subprocess.call([kubectl] + args)
 
 
 def get_api_server_url(cluster_registry_url: str, cluster_id: str):
@@ -117,6 +121,34 @@ def configure(args):
     stups_cli.config.store_config(config, APP_NAME)
 
 
+def _open_dashboard_in_browser():
+    import webbrowser
+    # sleep some time to make sure "kubectl proxy" runs
+    url = 'http://localhost:8001/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy'
+    with Action('Waiting for local kubectl proxy..') as act:
+        for i in range(20):
+            time.sleep(0.1)
+            try:
+                requests.get(url, timeout=2)
+            except:
+                act.progress()
+            else:
+                break
+    info('\nOpening {} ..'.format(url))
+    webbrowser.open(url)
+
+
+def dashboard(args):
+    import threading
+    # first make sure kubectl was downloaded
+    ensure_kubectl()
+    thread = threading.Thread(target=_open_dashboard_in_browser)
+    # start short-lived background thread to allow running "kubectl proxy" in main thread
+    thread.start()
+    kube_config.update(get_url())
+    proxy(['proxy'])
+
+
 def main(args=None):
     try:
         if not args:
@@ -127,6 +159,8 @@ def main(args=None):
             kube_config.update(login(cmd_args))
         elif cmd == 'configure':
             configure(cmd_args)
+        elif cmd == 'dashboard':
+            dashboard(cmd_args)
         else:
             kube_config.update(get_url())
             proxy()
