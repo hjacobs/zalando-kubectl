@@ -13,7 +13,7 @@ from . import kube_config
 
 APP_NAME = 'zalando-kubectl'
 KUBECTL_URL_TEMPLATE = 'https://storage.googleapis.com/kubernetes-release/release/{version}/bin/{os}/{arch}/kubectl'
-KUBECTL_VERSION = 'v1.5.1'
+KUBECTL_VERSION = 'v1.5.2'
 
 
 def ensure_kubectl():
