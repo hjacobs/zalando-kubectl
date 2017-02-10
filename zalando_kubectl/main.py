@@ -212,6 +212,12 @@ All other commands are forwarded to kubectl:
             ''')
 
 
+def do_login(args):
+    url = login(args)
+    with Action('Writing kubeconfig for {}..'.format(url)):
+        kube_config.update(url)
+
+
 def main(args=None):
     try:
         if not args:
@@ -219,7 +225,7 @@ def main(args=None):
         cmd = ''.join(args[1:2])
         cmd_args = args[2:]
         if cmd == 'login':
-            kube_config.update(login(cmd_args))
+            do_login(cmd_args)
         elif cmd == 'configure':
             configure(cmd_args)
         elif cmd == 'dashboard':
