@@ -55,26 +55,57 @@ def test_login(monkeypatch):
 
     api_url = 'https://my-cluster.example.org'
 
-    def get_api_server_url(cluster_registry_url, cluster_id):
+    def get_api_server_url_for_cluster_id(cluster_registry_url, cluster_id):
         assert cluster_registry_url == cluster_registry
         assert cluster_id == 'aws:123:eu-west-1:my-kube-1'
         return api_url
 
-    monkeypatch.setattr('zalando_kubectl.main.get_api_server_url', get_api_server_url)
+    def get_api_server_url_for_alias(cluster_registry_url, alias):
+        assert cluster_registry_url == cluster_registry
+        assert alias == 'my-alias'
+        return api_url
+
+    monkeypatch.setattr('zalando_kubectl.main.get_api_server_url_for_cluster_id', get_api_server_url_for_cluster_id)
+    monkeypatch.setattr('zalando_kubectl.main.get_api_server_url_for_alias', get_api_server_url_for_alias)
 
     url = zalando_kubectl.main.login(['aws:123:eu-west-1:my-kube-1'])
     assert api_url == url
 
+    url = zalando_kubectl.main.login(['foo.example.org'])
+    assert 'https://foo.example.org' == url
 
-def test_get_api_server_url(monkeypatch):
+    url = zalando_kubectl.main.login(['my-alias'])
+    assert api_url == url
+
+
+def test_get_api_server_url_for_cluster_id(monkeypatch):
     get = MagicMock()
     get.return_value.json.return_value = {'api_server_url': 'https://my-cluster.example.org'}
 
     monkeypatch.setattr('zign.api.get_token', lambda x, y: 'mytok')
     monkeypatch.setattr('requests.get', get)
 
-    url = zalando_kubectl.main.get_api_server_url('https://cluster-registry.example.org', 'my-cluster-id')
+    url = zalando_kubectl.main.get_api_server_url_for_cluster_id('https://cluster-registry.example.org', 'my-id')
     assert url == 'https://my-cluster.example.org'
+
+
+def test_get_api_server_url_for_alias(monkeypatch):
+    get = MagicMock()
+    get.return_value.json.return_value = {
+        'items': [{'api_server_url': 'https://my-cluster.example.org'}]
+    }
+
+    monkeypatch.setattr('zign.api.get_token', lambda x, y: 'mytok')
+    monkeypatch.setattr('requests.get', get)
+
+    url = zalando_kubectl.main.get_api_server_url_for_alias('https://cluster-registry.example.org', 'my-alias')
+    assert url == 'https://my-cluster.example.org'
+
+    get.return_value.json.return_value = {
+        'items': []
+    }
+    url = zalando_kubectl.main.get_api_server_url_for_alias('https://cluster-registry.example.org', 'my-alias')
+    assert url == 'my-alias'
 
 
 def test_configure(monkeypatch):
@@ -87,3 +118,12 @@ def test_configure(monkeypatch):
         zalando_kubectl.main.configure(['--my-option=123'])
     zalando_kubectl.main.configure(['--cluster-registry=123'])
     assert {'cluster_registry': '123'} == config
+
+
+def test_looks_like_url():
+    assert not zalando_kubectl.main.looks_like_url('')
+    assert not zalando_kubectl.main.looks_like_url('foo')
+    assert not zalando_kubectl.main.looks_like_url('foo.example')
+    assert zalando_kubectl.main.looks_like_url('https://localhost')
+    assert zalando_kubectl.main.looks_like_url('http://localhost')
+    assert zalando_kubectl.main.looks_like_url('foo.example.org')
