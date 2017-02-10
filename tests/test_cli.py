@@ -127,3 +127,7 @@ def test_looks_like_url():
     assert zalando_kubectl.main.looks_like_url('https://localhost')
     assert zalando_kubectl.main.looks_like_url('http://localhost')
     assert zalando_kubectl.main.looks_like_url('foo.example.org')
+
+
+def test_print_help():
+    zalando_kubectl.main.print_help()
