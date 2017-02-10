@@ -68,10 +68,10 @@ def proxy(args=None):
     subprocess.call([kubectl] + args)
 
 
-def get_api_server_url(cluster_registry_url: str, cluster_id: str):
+def get_api_server_url_for_cluster_id(cluster_registry_url: str, cluster_id: str):
     token = zign.api.get_token('kubectl', ['uid'])
     response = requests.get('{}/kubernetes-clusters/{}'.format(cluster_registry_url, cluster_id),
-                            headers={'Authorization': 'Bearer {}'.format(token)}, timeout=5)
+                            headers={'Authorization': 'Bearer {}'.format(token)}, timeout=10)
     if response.status_code == 404:
         error('Kubernetes cluster {} not found in Cluster Registry'.format(cluster_id))
         exit(1)
@@ -79,6 +79,29 @@ def get_api_server_url(cluster_registry_url: str, cluster_id: str):
     data = response.json()
     url = data.get('api_server_url')
     return url
+
+
+def get_api_server_url_for_alias(cluster_registry_url: str, alias: str):
+    token = zign.api.get_token('kubectl', ['uid'])
+    response = requests.get('{}/kubernetes-clusters'.format(cluster_registry_url),
+                            params={'alias': alias},
+                            headers={'Authorization': 'Bearer {}'.format(token)}, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    for cluster in data['items']:
+        return cluster['api_server_url']
+    # try to use alias as URL
+    return alias
+
+
+def looks_like_url(alias_or_url: str):
+    if alias_or_url.startswith('http:') or alias_or_url.startswith('https:'):
+        # https://something
+        return True
+    elif len(alias_or_url.split('.')) > 2:
+        # foo.example.org
+        return True
+    return False
 
 
 def login(args: list):
@@ -95,9 +118,15 @@ def login(args: list):
         cluster_registry = config.get('cluster_registry')
         if not cluster_registry:
             cluster_registry = fix_url(click.prompt('URL of Cluster Registry'))
-        url = get_api_server_url(cluster_registry, cluster_id)
-    else:
+        url = get_api_server_url_for_cluster_id(cluster_registry, cluster_id)
+    elif looks_like_url(cluster_or_url):
         url = cluster_or_url
+    else:
+        alias = cluster_or_url
+        cluster_registry = config.get('cluster_registry')
+        if not cluster_registry:
+            cluster_registry = fix_url(click.prompt('URL of Cluster Registry'))
+        url = get_api_server_url_for_alias(cluster_registry, alias)
 
     url = fix_url(url)
 
