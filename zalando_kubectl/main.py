@@ -1,13 +1,14 @@
 import os
 import subprocess
 import sys
+import time
 
 import click
 import requests
 import stups_cli.config
-import time
+import zalando_kubectl
 import zign.api
-from clickclick import Action, error, info
+from clickclick import Action, error, info, print_table
 
 from . import kube_config
 
@@ -178,6 +179,39 @@ def dashboard(args):
     proxy(['proxy'])
 
 
+def list_clusters(args):
+    config = stups_cli.config.load_config(APP_NAME)
+    cluster_registry = config.get('cluster_registry')
+    if not cluster_registry:
+        cluster_registry = fix_url(click.prompt('URL of Cluster Registry'))
+
+    token = zign.api.get_token('kubectl', ['uid'])
+    response = requests.get('{}/kubernetes-clusters'.format(cluster_registry),
+                            params={'lifecycle_status': 'ready'},
+                            headers={'Authorization': 'Bearer {}'.format(token)}, timeout=20)
+    response.raise_for_status()
+    data = response.json()
+    rows = []
+    for cluster in data['items']:
+        rows.append(cluster)
+    rows.sort(key=lambda c: (c['alias'], c['id']))
+    print_table('id alias environment channel'.split(), rows)
+
+
+def print_help():
+    click.secho('Zalando Kubectl {}\n'.format(zalando_kubectl.__version__), bold=True)
+    info('''Available wrapper commands:
+  zkubectl help                               Show this help message and exit
+  zkubectl configure --cluster-registry=URL   Set the Cluster Registry URL
+  zkubectl list                               Shortcut for "list-clusters"
+  zkubectl list-clusters                      List all Kubernetes cluster in "ready" state
+  zkubectl login CLUSTER_ALIAS_ID_OR_URL      Login to a specific cluster
+  zkubectl dashboard                          Open the Kubernetes dashboard UI in the browser
+
+All other commands are forwarded to kubectl:
+            ''')
+
+
 def main(args=None):
     try:
         if not args:
@@ -190,7 +224,11 @@ def main(args=None):
             configure(cmd_args)
         elif cmd == 'dashboard':
             dashboard(cmd_args)
+        elif cmd in ('list', 'list-clusters'):
+            list_clusters(cmd_args)
         else:
+            if not cmd or cmd in ('help', '-h', '--help'):
+                print_help()
             kube_config.update(get_url())
             proxy()
     except KeyboardInterrupt:
