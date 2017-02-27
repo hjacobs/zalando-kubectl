@@ -193,9 +193,14 @@ def list_clusters(args):
     data = response.json()
     rows = []
     for cluster in data['items']:
+        status = cluster.get('status', {})
+        version = status.get('current_version', '')[:7]
+        if status.get('next_version') and status.get('current_version') != status.get('next_version'):
+            version += ' (updating)'
+        cluster['version'] = version
         rows.append(cluster)
     rows.sort(key=lambda c: (c['alias'], c['id']))
-    print_table('id alias environment channel'.split(), rows)
+    print_table('id alias environment channel version'.split(), rows)
 
 
 def print_help():
