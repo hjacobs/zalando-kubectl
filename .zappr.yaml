@@ -7,3 +7,4 @@ approvals:
         orgs:
           - "zalando"
 X-Zalando-Team: "teapot"
+X-Zalando-Type: tools
