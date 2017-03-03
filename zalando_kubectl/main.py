@@ -235,6 +235,8 @@ def main(args=None):
             configure(cmd_args)
         elif cmd == 'dashboard':
             dashboard(cmd_args)
+        elif cmd == 'completion':
+            proxy()
         elif cmd in ('list', 'list-clusters'):
             list_clusters(cmd_args)
         else:
