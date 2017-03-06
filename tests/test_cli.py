@@ -4,6 +4,7 @@ import pytest
 import zalando_kubectl.main
 from zalando_kubectl import kube_config
 from zalando_kubectl.main import main
+from io import BytesIO
 
 
 def test_fix_url():
@@ -19,6 +20,15 @@ def test_main(monkeypatch):
     monkeypatch.setattr('zign.api.get_token', MagicMock(return_value='mytok'))
     monkeypatch.setattr('zalando_kubectl.kube_config.update', MagicMock(return_value={}))
     main(['foo', 'get', 'pods'])
+
+
+def test_main_completion(monkeypatch):
+    mock_popen = MagicMock()
+    mock_popen.return_value.stdout = BytesIO(b'kubectl')
+    mock_popen.return_value.wait.return_value = 0
+    monkeypatch.setattr('zalando_kubectl.main.ensure_kubectl', MagicMock())
+    monkeypatch.setattr('subprocess.Popen', mock_popen)
+    main(['foo', 'completion', 'bash'])
 
 
 def test_kube_config(monkeypatch):

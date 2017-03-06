@@ -69,6 +69,18 @@ def proxy(args=None):
     subprocess.call([kubectl] + args)
 
 
+def completion(args=None):
+    kubectl = ensure_kubectl()
+
+    if not args:
+        args = sys.argv[1:]
+
+    popen = subprocess.Popen([kubectl] + args, stdout=subprocess.PIPE)
+    for stdout_line in popen.stdout:
+        print(stdout_line.decode('utf-8').replace('kubectl', 'zkubectl'), end='')
+    popen.stdout.close()
+
+
 def get_api_server_url_for_cluster_id(cluster_registry_url: str, cluster_id: str):
     token = zign.api.get_token('kubectl', ['uid'])
     response = requests.get('{}/kubernetes-clusters/{}'.format(cluster_registry_url, cluster_id),
@@ -236,7 +248,7 @@ def main(args=None):
         elif cmd == 'dashboard':
             dashboard(cmd_args)
         elif cmd == 'completion':
-            proxy()
+            completion()
         elif cmd in ('list', 'list-clusters'):
             list_clusters(cmd_args)
         else:
