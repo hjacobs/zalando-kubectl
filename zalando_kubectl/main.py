@@ -1,7 +1,11 @@
+import hashlib
 import os
+import random
+import string
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 import click
 import requests
@@ -14,14 +18,16 @@ from . import kube_config
 
 APP_NAME = 'zalando-kubectl'
 KUBECTL_URL_TEMPLATE = 'https://storage.googleapis.com/kubernetes-release/release/{version}/bin/{os}/{arch}/kubectl'
-KUBECTL_VERSION = 'v1.5.3'
+KUBECTL_VERSION = 'v1.5.4'
+KUBECTL_SHA256 = '1d9be6531f9830798b94d2a3ba6d07592ac664b8e12a8ddf201dd815719b9563'
 
 
 def ensure_kubectl():
-    kubectl = os.path.join(click.get_app_dir(APP_NAME), 'kubectl-{}'.format(KUBECTL_VERSION))
+    path = Path(os.getenv('KUBECTL_DOWNLOAD_DIR') or click.get_app_dir(APP_NAME))
+    kubectl = path / 'kubectl-{}'.format(KUBECTL_VERSION)
 
-    if not os.path.exists(kubectl):
-        os.makedirs(os.path.dirname(kubectl), exist_ok=True)
+    if not kubectl.exists():
+        kubectl.parent.mkdir(parents=True, exist_ok=True)
 
         platform = sys.platform  # linux or darwin
         arch = 'amd64'  # FIXME: hardcoded value
@@ -29,17 +35,23 @@ def ensure_kubectl():
         with Action('Downloading {} to {}..'.format(url, kubectl)) as act:
             response = requests.get(url, stream=True)
             response.raise_for_status()
-            local_file = kubectl + '.download'
-            with open(local_file, 'wb') as fd:
+            # add random suffix to allow multiple downloads in parallel
+            random_suffix = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))
+            local_file = kubectl.with_name('{}.download-{}'.format(kubectl.name, random_suffix))
+            m = hashlib.sha256()
+            with local_file.open('wb') as fd:
                 for i, chunk in enumerate(response.iter_content(chunk_size=4096)):
                     if chunk:  # filter out keep-alive new chunks
                         fd.write(chunk)
+                        m.update(chunk)
                         if i % 256 == 0:  # every 1MB
                             act.progress()
-            os.chmod(local_file, 0o755)
-            os.rename(local_file, kubectl)
+            if m.hexdigest() != KUBECTL_SHA256:
+                act.fatal_error('CHECKSUM MISMATCH')
+            local_file.chmod(0o755)
+            local_file.rename(kubectl)
 
-    return kubectl
+    return str(kubectl)
 
 
 def get_url():
