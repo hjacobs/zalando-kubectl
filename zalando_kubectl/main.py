@@ -34,7 +34,7 @@ def ensure_kubectl():
             kubectl.parent.mkdir(parents=True)
         except FileExistsError:
             # support Python 3.4
-            # "exists_ok" was introduced with 3.5
+            # "exist_ok" was introduced with 3.5
             pass
 
         platform = sys.platform  # linux or darwin
