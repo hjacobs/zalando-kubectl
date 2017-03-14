@@ -30,7 +30,12 @@ def ensure_kubectl():
     kubectl = path / 'kubectl-{}'.format(KUBECTL_VERSION)
 
     if not kubectl.exists():
-        kubectl.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            kubectl.parent.mkdir(parents=True)
+        except FileExistsError:
+            # support Python 3.4
+            # "exist_ok" was introduced with 3.5
+            pass
 
         platform = sys.platform  # linux or darwin
         arch = 'amd64'  # FIXME: hardcoded value

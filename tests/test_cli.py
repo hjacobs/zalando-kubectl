@@ -1,3 +1,4 @@
+import hashlib
 from unittest.mock import MagicMock
 
 import pytest
@@ -141,3 +142,21 @@ def test_looks_like_url():
 
 def test_print_help():
     zalando_kubectl.main.print_help()
+
+
+def test_ensure_kubectl(monkeypatch, tmpdir):
+    chunks = [b'chunk1', b'chunk2']
+
+    m = hashlib.sha256()
+    for chunk in chunks:
+        m.update(chunk)
+
+    checksum = m.hexdigest()
+
+    get = MagicMock()
+    get.return_value.iter_content.return_value = chunks
+    monkeypatch.setattr('click.get_app_dir', lambda a: str(tmpdir))
+    monkeypatch.setattr('requests.get', get)
+    monkeypatch.setattr('zalando_kubectl.main.KUBECTL_SHA256', {'linux': checksum, 'darwin': checksum})
+    kubectl = zalando_kubectl.main.ensure_kubectl()
+    assert str(tmpdir.join('kubectl-v1.5.4')) == kubectl
