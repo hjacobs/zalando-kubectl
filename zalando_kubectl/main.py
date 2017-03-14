@@ -19,7 +19,10 @@ from . import kube_config
 APP_NAME = 'zalando-kubectl'
 KUBECTL_URL_TEMPLATE = 'https://storage.googleapis.com/kubernetes-release/release/{version}/bin/{os}/{arch}/kubectl'
 KUBECTL_VERSION = 'v1.5.4'
-KUBECTL_SHA256 = '1d9be6531f9830798b94d2a3ba6d07592ac664b8e12a8ddf201dd815719b9563'
+KUBECTL_SHA256 = {
+    'linux': '1d9be6531f9830798b94d2a3ba6d07592ac664b8e12a8ddf201dd815719b9563',
+    'darwin': 'e5d994be1c781000598ef0312b9d3d9bf3e03b4a3f6a1df6d5086e41a324905c'
+}
 
 
 def ensure_kubectl():
@@ -46,7 +49,7 @@ def ensure_kubectl():
                         m.update(chunk)
                         if i % 256 == 0:  # every 1MB
                             act.progress()
-            if m.hexdigest() != KUBECTL_SHA256:
+            if m.hexdigest() != KUBECTL_SHA256[platform]:
                 act.fatal_error('CHECKSUM MISMATCH')
             local_file.chmod(0o755)
             local_file.rename(kubectl)
