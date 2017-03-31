@@ -18,10 +18,10 @@ from . import kube_config
 
 APP_NAME = 'zalando-kubectl'
 KUBECTL_URL_TEMPLATE = 'https://storage.googleapis.com/kubernetes-release/release/{version}/bin/{os}/{arch}/kubectl'
-KUBECTL_VERSION = 'v1.5.4'
+KUBECTL_VERSION = 'v1.6.0'
 KUBECTL_SHA256 = {
-    'linux': '1d9be6531f9830798b94d2a3ba6d07592ac664b8e12a8ddf201dd815719b9563',
-    'darwin': 'e5d994be1c781000598ef0312b9d3d9bf3e03b4a3f6a1df6d5086e41a324905c'
+    'linux': 'c488d77cd980ca7dae03bc684e19bd6a329962e32ed7a1bc9c4d560ed433399a',
+    'darwin': '707e75673d265d701d30c4db81cc9158bc57f1e3c796fc29e1a51709e2126423'
 }
 
 

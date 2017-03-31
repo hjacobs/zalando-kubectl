@@ -159,4 +159,4 @@ def test_ensure_kubectl(monkeypatch, tmpdir):
     monkeypatch.setattr('requests.get', get)
     monkeypatch.setattr('zalando_kubectl.main.KUBECTL_SHA256', {'linux': checksum, 'darwin': checksum})
     kubectl = zalando_kubectl.main.ensure_kubectl()
-    assert str(tmpdir.join('kubectl-v1.5.4')) == kubectl
+    assert str(tmpdir.join('kubectl-{}'.format(zalando_kubectl.main.KUBECTL_VERSION))) == kubectl
